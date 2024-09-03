@@ -42,7 +42,11 @@ func menu(conn *libs.IClient, m *libs.IMessage) bool {
 
 	var keys tagSlice
 	for key := range tags {
-		keys = append(keys, key)
+		if key == "" {
+			continue
+		} else {
+			keys = append(keys, key)
+		}
 	}
 
 	sort.Sort(keys)
