@@ -8,7 +8,8 @@ import (
 	"strings"
 
 	"go.mau.fi/whatsmeow"
-	waProto "go.mau.fi/whatsmeow/binary/proto"
+	"go.mau.fi/whatsmeow/proto/waCommon"
+	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/types"
 	"google.golang.org/protobuf/proto"
 )
@@ -19,9 +20,9 @@ func SerializeClient(conn *whatsmeow.Client) *IClient {
 	}
 }
 
-func (conn *IClient) SendText(from types.JID, txt string, opts *waProto.ContextInfo, optn ...whatsmeow.SendRequestExtra) (whatsmeow.SendResponse, error) {
-	ok, er := conn.WA.SendMessage(context.Background(), from, &waProto.Message{
-		ExtendedTextMessage: &waProto.ExtendedTextMessage{
+func (conn *IClient) SendText(from types.JID, txt string, opts *waE2E.ContextInfo, optn ...whatsmeow.SendRequestExtra) (whatsmeow.SendResponse, error) {
+	ok, er := conn.WA.SendMessage(context.Background(), from, &waE2E.Message{
+		ExtendedTextMessage: &waE2E.ExtendedTextMessage{
 			Text:        proto.String(txt),
 			ContextInfo: opts,
 		},
@@ -32,13 +33,13 @@ func (conn *IClient) SendText(from types.JID, txt string, opts *waProto.ContextI
 	return ok, nil
 }
 
-func (conn *IClient) SendWithNewsLestter(from types.JID, text string, newjid string, newserver int32, name string, opts *waProto.ContextInfo) (whatsmeow.SendResponse, error) {
-	ok, er := conn.SendText(from, text, &waProto.ContextInfo{
-		ForwardedNewsletterMessageInfo: &waProto.ForwardedNewsletterMessageInfo{
+func (conn *IClient) SendWithNewsLestter(from types.JID, text string, newjid string, newserver int32, name string, opts *waE2E.ContextInfo) (whatsmeow.SendResponse, error) {
+	ok, er := conn.SendText(from, text, &waE2E.ContextInfo{
+		ForwardedNewsletterMessageInfo: &waE2E.ContextInfo_ForwardedNewsletterMessageInfo{
 			NewsletterJID:     proto.String(newjid),
 			NewsletterName:    proto.String(name),
 			ServerMessageID:   proto.Int32(newserver),
-			ContentType:       waProto.ForwardedNewsletterMessageInfo_UPDATE.Enum(),
+			ContentType:       waE2E.ContextInfo_ForwardedNewsletterMessageInfo_UPDATE.Enum(),
 			AccessibilityText: proto.String(""),
 		},
 		IsForwarded:   proto.Bool(true),
@@ -53,14 +54,14 @@ func (conn *IClient) SendWithNewsLestter(from types.JID, text string, newjid str
 	return ok, nil
 }
 
-func (conn *IClient) SendImage(from types.JID, data []byte, caption string, opts *waProto.ContextInfo) (whatsmeow.SendResponse, error) {
+func (conn *IClient) SendImage(from types.JID, data []byte, caption string, opts *waE2E.ContextInfo) (whatsmeow.SendResponse, error) {
 	uploaded, err := conn.WA.Upload(context.Background(), data, whatsmeow.MediaImage)
 	if err != nil {
 		fmt.Printf("Failed to upload file: %v\n", err)
 		return whatsmeow.SendResponse{}, err
 	}
-	resultImg := &waProto.Message{
-		ImageMessage: &waProto.ImageMessage{
+	resultImg := &waE2E.Message{
+		ImageMessage: &waE2E.ImageMessage{
 			URL:           proto.String(uploaded.URL),
 			DirectPath:    proto.String(uploaded.DirectPath),
 			MediaKey:      uploaded.MediaKey,
@@ -76,14 +77,14 @@ func (conn *IClient) SendImage(from types.JID, data []byte, caption string, opts
 	return ok, nil
 }
 
-func (conn *IClient) SendVideo(from types.JID, data []byte, caption string, opts *waProto.ContextInfo) (whatsmeow.SendResponse, error) {
+func (conn *IClient) SendVideo(from types.JID, data []byte, caption string, opts *waE2E.ContextInfo) (whatsmeow.SendResponse, error) {
 	uploaded, err := conn.WA.Upload(context.Background(), data, whatsmeow.MediaVideo)
 	if err != nil {
 		fmt.Printf("Failed to upload file: %v\n", err)
 		return whatsmeow.SendResponse{}, err
 	}
-	resultVideo := &waProto.Message{
-		VideoMessage: &waProto.VideoMessage{
+	resultVideo := &waE2E.Message{
+		VideoMessage: &waE2E.VideoMessage{
 			URL:           proto.String(uploaded.URL),
 			DirectPath:    proto.String(uploaded.DirectPath),
 			MediaKey:      uploaded.MediaKey,
@@ -102,14 +103,14 @@ func (conn *IClient) SendVideo(from types.JID, data []byte, caption string, opts
 	return ok, nil
 }
 
-func (conn *IClient) SendDocument(from types.JID, data []byte, fileName string, caption string, opts *waProto.ContextInfo) (whatsmeow.SendResponse, error) {
+func (conn *IClient) SendDocument(from types.JID, data []byte, fileName string, caption string, opts *waE2E.ContextInfo) (whatsmeow.SendResponse, error) {
 	uploaded, err := conn.WA.Upload(context.Background(), data, whatsmeow.MediaDocument)
 	if err != nil {
 		fmt.Printf("Failed to upload file: %v\n", err)
 		return whatsmeow.SendResponse{}, err
 	}
-	resultDoc := &waProto.Message{
-		DocumentMessage: &waProto.DocumentMessage{
+	resultDoc := &waE2E.Message{
+		DocumentMessage: &waE2E.DocumentMessage{
 			URL:           proto.String(uploaded.URL),
 			DirectPath:    proto.String(uploaded.DirectPath),
 			MediaKey:      uploaded.MediaKey,
@@ -130,10 +131,10 @@ func (conn *IClient) SendDocument(from types.JID, data []byte, fileName string, 
 }
 
 func (conn *IClient) DeleteMsg(from types.JID, id string, me bool) {
-	conn.WA.SendMessage(context.Background(), from, &waProto.Message{
-		ProtocolMessage: &waProto.ProtocolMessage{
-			Type: waProto.ProtocolMessage_REVOKE.Enum(),
-			Key: &waProto.MessageKey{
+	conn.WA.SendMessage(context.Background(), from, &waE2E.Message{
+		ProtocolMessage: &waE2E.ProtocolMessage{
+			Type: waE2E.ProtocolMessage_REVOKE.Enum(),
+			Key: &waCommon.MessageKey{
 				FromMe: proto.Bool(me),
 				ID:     proto.String(id),
 			},
@@ -173,15 +174,15 @@ func (conn *IClient) FetchGroupAdmin(Jid types.JID) ([]string, error) {
 	return Admin, err
 }
 
-func (conn *IClient) SendSticker(jid types.JID, data []byte, opts *waProto.ContextInfo) (whatsmeow.SendResponse, error) {
+func (conn *IClient) SendSticker(jid types.JID, data []byte, opts *waE2E.ContextInfo) (whatsmeow.SendResponse, error) {
 	uploaded, err := conn.WA.Upload(context.Background(), data, whatsmeow.MediaImage)
 	if err != nil {
 		fmt.Printf("Failed to upload file: %v\n", err)
 		return whatsmeow.SendResponse{}, err
 	}
 
-	ok, er := conn.WA.SendMessage(context.Background(), jid, &waProto.Message{
-		StickerMessage: &waProto.StickerMessage{
+	ok, er := conn.WA.SendMessage(context.Background(), jid, &waE2E.Message{
+		StickerMessage: &waE2E.StickerMessage{
 			URL:           proto.String(uploaded.URL),
 			DirectPath:    proto.String(uploaded.DirectPath),
 			MediaKey:      uploaded.MediaKey,

@@ -2,7 +2,7 @@ package libs
 
 import (
 	"go.mau.fi/whatsmeow"
-	waProto "go.mau.fi/whatsmeow/binary/proto"
+	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/types"
 )
 
@@ -33,11 +33,11 @@ type IMessage struct {
 	Text       string
 	Args       []string
 	Command    string
-	Message    *waProto.Message
+	Message    *waE2E.Message
 	Media      whatsmeow.DownloadableMessage
 	IsMedia    string
 	Expiration uint32
-	Quoted     *waProto.ContextInfo
+	Quoted     *waE2E.ContextInfo
 	Reply      func(text string, opts ...whatsmeow.SendRequestExtra) (whatsmeow.SendResponse, error)
 	React      func(emoji string, opts ...whatsmeow.SendRequestExtra) (whatsmeow.SendResponse, error)
 }

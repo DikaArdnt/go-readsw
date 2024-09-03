@@ -15,7 +15,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/mdp/qrterminal"
 	"go.mau.fi/whatsmeow"
-	waProto "go.mau.fi/whatsmeow/binary/proto"
+	"go.mau.fi/whatsmeow/proto/waCompanionReg"
 	"go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/store/sqlstore"
 	"go.mau.fi/whatsmeow/types"
@@ -31,7 +31,7 @@ type Template struct {
 var log helpers.Logger
 
 func init() {
-	store.DeviceProps.PlatformType = waProto.DeviceProps_EDGE.Enum()
+	store.DeviceProps.PlatformType = waCompanionReg.DeviceProps_EDGE.Enum()
 	store.DeviceProps.Os = proto.String("Linux")
 }
 
@@ -77,7 +77,6 @@ func StartClient() {
 				case "code":
 					qrterminal.GenerateHalfBlock(evt.Code, qrterminal.L, os.Stdout)
 					log.Info("Qr Required")
-					break
 				}
 			}
 		}
@@ -90,7 +89,7 @@ func StartClient() {
 	}
 
 	// Listen to Ctrl+C (you can also do something else that prevents the program from exiting)
-	c := make(chan os.Signal)
+	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
 

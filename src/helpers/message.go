@@ -2,11 +2,11 @@ package helpers
 
 import (
 	"go.mau.fi/whatsmeow"
-	waProto "go.mau.fi/whatsmeow/binary/proto"
+	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/types/events"
 )
 
-func ParseMessage(message *events.Message) *waProto.Message {
+func ParseMessage(message *events.Message) *waE2E.Message {
 	if message.Message.GetEphemeralMessage() != nil {
 		return message.Message.GetEphemeralMessage().GetMessage()
 	} else if message.Message.GetViewOnceMessage() != nil {
@@ -22,7 +22,7 @@ func ParseMessage(message *events.Message) *waProto.Message {
 }
 
 func GetTextMessage(message *events.Message) string {
-	var msg *waProto.Message
+	var msg *waE2E.Message
 
 	msg = ParseMessage(message)
 
@@ -41,7 +41,7 @@ func GetTextMessage(message *events.Message) string {
 	return ""
 }
 
-func ParseQuotedMessage(message *waProto.Message) *waProto.Message {
+func ParseQuotedMessage(message *waE2E.Message) *waE2E.Message {
 	if msg := message.GetExtendedTextMessage().GetContextInfo(); msg != nil {
 		return msg.GetQuotedMessage()
 	} else if msg := message.GetImageMessage().GetContextInfo(); msg != nil {
@@ -70,7 +70,7 @@ func ParseQuotedMessage(message *waProto.Message) *waProto.Message {
 	return nil
 }
 
-func GetContextInfo(message *waProto.Message) *waProto.ContextInfo {
+func GetContextInfo(message *waE2E.Message) *waE2E.ContextInfo {
 	if msg := message.GetExtendedTextMessage().GetContextInfo(); msg != nil {
 		return msg
 	} else if msg := message.GetImageMessage().GetContextInfo(); msg != nil {
@@ -99,7 +99,7 @@ func GetContextInfo(message *waProto.Message) *waProto.ContextInfo {
 	return nil
 }
 
-func GetMediaMessage(message *waProto.Message) whatsmeow.DownloadableMessage {
+func GetMediaMessage(message *waE2E.Message) whatsmeow.DownloadableMessage {
 	if msg := message.GetImageMessage(); msg != nil {
 		return msg
 	} else if msg := message.GetVideoMessage(); msg != nil {
@@ -114,7 +114,7 @@ func GetMediaMessage(message *waProto.Message) whatsmeow.DownloadableMessage {
 	return nil
 }
 
-func GetMediaType(message *waProto.Message) string {
+func GetMediaType(message *waE2E.Message) string {
 	if msg := message.GetImageMessage(); msg != nil {
 		return "image"
 	} else if msg := message.GetVideoMessage(); msg != nil {

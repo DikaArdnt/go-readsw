@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"go.mau.fi/whatsmeow"
-	waProto "go.mau.fi/whatsmeow/binary/proto"
+	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/types/events"
 	"google.golang.org/protobuf/proto"
 )
@@ -75,7 +75,7 @@ func SerializeMessage(mess *events.Message, conn *IClient) *IMessage {
 			} else {
 				Expiration = uint32(0)
 			}
-			return conn.SendText(mess.Info.Chat, text, &waProto.ContextInfo{
+			return conn.SendText(mess.Info.Chat, text, &waE2E.ContextInfo{
 				StanzaID:      &mess.Info.ID,
 				Participant:   proto.String(mess.Info.Sender.String()),
 				QuotedMessage: mess.Message,
